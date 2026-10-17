@@ -301,7 +301,7 @@ const getSeen=()=>{try{return +localStorage.getItem('10quest.seen')||0}catch(e){
 const setSeen=v=>{try{localStorage.setItem('10quest.seen',String(v))}catch(e){}};
 const mmss=sec=>Math.floor(sec/60)+'분 '+String(sec%60).padStart(2,'0')+'초';
 // results by email via FormSubmit (works on a normal website; blocked inside claude.ai, where db is used instead)
-const NOTIFY=''; // 결과를 받을 이메일 주소
+const NOTIFY='dreamasdream@gmail.com'; // 결과를 받을 이메일 주소
 function flush(){if(!NOTIFY||!S.pending||flush.busy)return;flush.busy=true;const l=S.pending;
   fetch('https://formsubmit.co/ajax/'+NOTIFY,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
     body:JSON.stringify({_subject:`[10QUEST] ${S.name} · Day ${l.day} ${l.title} ${l.first}/${l.total}`,_template:'box',
