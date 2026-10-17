@@ -1,0 +1,544 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<title>10QUEST Math</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Chakra+Petch:wght@500;700&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: one phone-width column; a swim lane (10 laps) is the core progress device, lane-rope stripe is the one flourish */
+:root{
+  --bg:#EAF3F5; --surface:#FFFFFF; --ink:#0B2633; --muted:#4F6B76; --line:#C9DDE3; --tile:#DCEAEE;
+  --pool:#0A85AC; --pool-ink:#FFFFFF; --rope:#D9443A; --gold:#D79B12; --gold-bg:#FBF0D2; --ok:#1F8A5B; --ok-bg:#DDF1E7; --soft:#E3F1F5;
+  --f-display:"Black Han Sans","Apple SD Gothic Neo",sans-serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-num:"Chakra Petch",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#061A22; --surface:#0C2631; --ink:#E2F0F4; --muted:#8FB0BB; --line:#1E3E4A; --tile:#0B222C;
+  --pool:#36BEE3; --pool-ink:#04212B; --rope:#F0675C; --gold:#F2C64B; --gold-bg:#3A3112; --ok:#4CC58B; --ok-bg:#103A28; --soft:#0F3140; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#061A22; --surface:#0C2631; --ink:#E2F0F4; --muted:#8FB0BB; --line:#1E3E4A; --tile:#0B222C;
+  --pool:#36BEE3; --pool-ink:#04212B; --rope:#F0675C; --gold:#F2C64B; --gold-bg:#3A3112; --ok:#4CC58B; --ok-bg:#103A28; --soft:#0F3140; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;
+  background-image:linear-gradient(var(--tile) 1px,transparent 1px),linear-gradient(90deg,var(--tile) 1px,transparent 1px);background-size:28px 28px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+#app{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;margin:0;text-wrap:balance;letter-spacing:.01em}
+h1{font-size:2.2rem;line-height:1.1} h2{font-size:1.5rem;line-height:1.25} h3{font-size:1.15rem}
+p{margin:0}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.eyebrow{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.muted{color:var(--muted)}
+.rope{height:8px;border-radius:4px;background:repeating-linear-gradient(90deg,var(--rope) 0 14px,var(--surface) 14px 18px,var(--pool) 18px 32px,var(--surface) 32px 36px)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.between{justify-content:space-between}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--pool);outline-offset:2px}
+.btn{background:var(--pool);color:var(--pool-ink);font-weight:700;border-radius:10px;padding:14px 18px;font-size:1.05rem;min-height:48px}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.gold{background:var(--gold);color:#1C1503}
+.btn.wide{width:100%}
+.btn:disabled{opacity:.45;cursor:default}
+.link{color:var(--pool);font-weight:700;padding:6px 0;min-height:40px}
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center}
+.stat b{display:block;font-family:var(--f-num);font-size:1.35rem;line-height:1.2}
+.stat span{font-size:.72rem;color:var(--muted)}
+.xpbar{height:6px;background:var(--soft);border-radius:3px;overflow:hidden}
+.xpbar i{display:block;height:100%;background:var(--gold)}
+/* quest map */
+.map{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:left;display:flex;flex-direction:column;gap:2px;min-height:76px}
+.tile .d{font-family:var(--f-num);font-size:.78rem;color:var(--muted);font-weight:700}
+.tile .t{font-weight:700;line-height:1.3}
+.tile .s{font-size:.78rem;color:var(--muted)}
+.tile.done{border-color:var(--ok)} .tile.done .s{color:var(--ok);font-weight:700}
+.tile.next{border:2px solid var(--pool)}
+.tile.locked{opacity:.45;cursor:default}
+.hero{background:var(--pool);color:var(--pool-ink);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.hero .btn{background:var(--pool-ink);color:var(--pool)}
+/* lane */
+.lane{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:4px}
+.lap{height:12px;border-radius:3px;background:var(--soft);border:1px solid var(--line)}
+.lap.cur{background:var(--pool);border-color:var(--pool)}
+.lap.first{background:var(--ok);border-color:var(--ok)}
+.lap.hint{background:var(--gold);border-color:var(--gold)}
+.lap.similar{background:transparent;border:2px solid var(--gold)}
+.lap.missed{background:transparent;border:2px dashed var(--muted)}
+.tier{display:inline-block;font-size:.75rem;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--soft);color:var(--ink)}
+.tier.boss{background:var(--rope);color:#fff}
+.q{font-size:1.2rem;line-height:1.55;white-space:pre-line}
+.ansbox{font-family:var(--f-num);font-size:2rem;min-height:56px;border:2px solid var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.ansbox.empty{color:var(--muted);font-size:1rem;font-family:var(--f-body)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pad button{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-height:52px;font-family:var(--f-num);font-size:1.4rem;font-weight:700}
+.choices{display:flex;flex-direction:column;gap:8px}
+.choice{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;text-align:left;font-size:1.08rem;min-height:52px;display:flex;gap:10px;align-items:center}
+.choice .k{font-family:var(--f-num);color:var(--muted);font-weight:700}
+.choice.sel{border:2px solid var(--pool)}
+.fb{border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.fb.ok{background:var(--ok-bg)} .fb.ok b{color:var(--ok)}
+.fb.hint{background:var(--gold-bg)}
+.fb.why{background:var(--soft)}
+.formula{font-family:var(--f-num);background:var(--soft);border-radius:8px;padding:10px 12px;font-size:1.05rem;overflow-x:auto}
+.steps{display:flex;flex-direction:column;gap:10px}
+.step{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
+.step .n{font-family:var(--f-num);font-weight:700;width:28px;height:28px;border-radius:50%;background:var(--pool);color:var(--pool-ink);display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.step>div{min-width:0}
+.big{font-family:var(--f-num);font-size:3rem;line-height:1;font-weight:700}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.rate{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.rate button{border:1px solid var(--line);border-radius:10px;min-height:48px;background:var(--surface);font-family:var(--f-num);font-weight:700;font-size:1.1rem}
+.rate button.on{background:var(--gold);border-color:var(--gold);color:#1C1503}
+textarea{width:100%;box-sizing:border-box;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px;min-height:80px;resize:vertical}
+input[type=text]{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px;min-width:0;flex:1}
+.toggle{display:flex;align-items:center;gap:10px;min-height:44px}
+.toggle input{width:20px;height:20px;accent-color:var(--pool)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:700;z-index:20}
+@keyframes pop{0%{transform:scale(.9);opacity:.4}100%{transform:scale(1);opacity:1}}
+.fb{animation:pop .18s ease-out}
+@media (prefers-reduced-motion:reduce){.fb{animation:none}}
+</style>
+
+<div id="app"></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+// ---------- helpers ----------
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[R(0,a.length-1)];
+const sg=()=>Math.random()<.5?-1:1;
+const nz=(a,b)=>{let v;do v=R(a,b);while(!v);return v};
+const M='−';
+const fmt=n=>n<0?M+Math.abs(n):String(n);
+const P=n=>n<0?`(${fmt(n)})`:String(n);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function poly(cs){ // [a2,a1,a0] or [a1,a0] -> "2x² − 3x + 1"
+  let s='';const deg=cs.length-1;
+  cs.forEach((c,i)=>{if(!c)return;const p=deg-i,abs=Math.abs(c);
+    const t=p===0?String(abs):(abs===1?'':abs)+(p===1?'x':'x²');
+    s+=s?(c<0?' − ':' + ')+t:(c<0?M:'')+t});
+  return s||'0';
+}
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=R(0,i);[a[i],a[j]]=[a[j],a[i]]}return a};
+function mc(ans,wrongs,fill){const s=[ans];for(const w of wrongs)if(s.length<4&&!s.includes(w))s.push(w);let k=1;while(s.length<4){const w=fill(k++);if(!s.includes(w))s.push(w)}return shuffle(s)}
+const step=k=>(k%2?1:-1)*Math.ceil(k/2);
+function mcN(ans,wrongs,wrap=fmt){return{ans:wrap(ans),choices:mc(wrap(ans),wrongs.map(wrap),k=>wrap(ans+step(k)))}}
+function mcP(cs,wrongs,pre=''){const w=c=>pre+poly(c);return{ans:w(cs),choices:mc(w(cs),wrongs.map(w),k=>w(cs.map((c,i)=>i===cs.length-1?c+step(k):c)))}}
+
+// ---------- 14 quests: story -> discover -> 10 laps ----------
+// each gen returns {q, ans, choices?, hint, why}; numbers are random every time, so a "similar problem" is always fresh
+const Q=[
+{title:'음수의 세계',concept:'정수의 덧셈·뺄셈',
+ story:['다이빙 풀','다이빙 풀에서 수면 아래 3m까지 내려갔다가 1m 올라왔어. 지금 위치를 숫자 하나로 말할 수 있을까?','수면을 0, 아래를 음수(−)로 쓰면 바로 −2m야.'],
+ discover:['수직선을 떠올려. 0이 수면, 오른쪽(위)이 +, 왼쪽(아래)이 −.','양수를 더하면 오른쪽, 음수를 더하면 왼쪽으로 이동.<div class="formula">(−3) + 1 = −2</div>','음수를 빼면 방향이 뒤집혀.<div class="formula">5 − (−2) = 5 + 2 = 7</div>'],
+ key:'음수를 빼기 = 그 크기만큼 더하기',
+ gen:{
+  b(){const a=nz(-12,12),b=R(-12,-1),plus=Math.random()<.5,ans=plus?a+b:a-b;
+   return{q:`${P(a)} ${plus?'+':M} ${P(b)} 의 값은?`,ans,hint:plus?'음수를 더하면 수직선에서 왼쪽으로 가. 즉 그 크기만큼 빼면 돼.':'음수를 빼면 방향이 뒤집혀. −(−3)은 +3이야.',
+    why:`${P(a)} ${plus?'+':M} ${P(b)} = ${fmt(a)} ${plus?M:'+'} ${Math.abs(b)} = ${fmt(ans)}`}},
+  a(){if(Math.random()<.5){const t=R(2,9),u=R(3,15);return{q:`새벽 기온이 ${M}${t}°C였는데 오후까지 ${u}도 올랐어.\n오후 기온은 몇 °C?`,ans:u-t,hint:`${M}${t}에서 오른쪽으로 ${u}칸 이동해 봐.`,why:`(${M}${t}) + ${u} = ${fmt(u-t)}°C`}}
+   const d=R(4,12),u=R(1,d-1);return{q:`수면을 0m로 할 때, 수면 아래 ${d}m까지 잠수했다가 ${u}m 올라왔어.\n지금 위치는 몇 m?`,ans:u-d,hint:`수면 아래 ${d}m는 ${M}${d}. 여기에 +${u}.`,why:`(${M}${d}) + ${u} = ${fmt(u-d)}m (수면 아래 ${d-u}m)`}},
+  e(){const a=R(-9,-1),b=R(-9,-1),ans=a-b;return{q:`(${fmt(a)}) − (${fmt(b)}) 의 값은?`,...mcN(ans,[a+b,-ans,-(a+b)]),hint:'−(−b)는 +b로 바꾸고 계산해.',why:`(${fmt(a)}) + ${Math.abs(b)} = ${fmt(ans)}`}},
+  boss(){const a=nz(-10,10),b=R(-10,-1),c=R(-10,-1),ans=a-b+c;return{q:`${P(a)} − ${P(b)} + ${P(c)} 의 값은?`,ans,hint:'빼기 음수는 더하기로 먼저 바꾸고, 왼쪽부터 차례로.',why:`${fmt(a)} + ${Math.abs(b)} ${M} ${Math.abs(c)} = ${fmt(ans)}`}}
+ }},
+{title:'부호 게임',concept:'정수의 곱셈·나눗셈',
+ story:['연패의 계산','게임에서 한 판 질 때마다 랭크 점수가 20점씩 깎여. 3연패면 점수는 얼마나 변했을까?','(−20) × 3 = −60. 음수의 곱셈은 이런 상황을 한 줄로 써.'],
+ discover:['숫자 계산과 부호 계산을 따로 해.','음수가 짝수 개면 +, 홀수 개면 −.<div class="formula">(−4) × (−5) = +20</div><div class="formula">(−4) × 5 = −20</div>','나눗셈도 규칙은 똑같아.<div class="formula">(−18) ÷ 3 = −6</div>'],
+ key:'음수 짝수 개 → +, 홀수 개 → −',
+ gen:{
+  b(){const a=R(2,9)*sg(),b=R(2,9)*sg();if(Math.random()<.5)return{q:`${P(a)} × ${P(b)} 의 값은?`,ans:a*b,hint:'부호 먼저: 음수가 몇 개인지 세어 봐. 그다음 숫자끼리 곱해.',why:`${Math.abs(a)} × ${Math.abs(b)} = ${Math.abs(a*b)}, 부호는 ${a*b<0?'−':'+'} → ${fmt(a*b)}`};
+   return{q:`${P(a*b)} ÷ ${P(b)} 의 값은?`,ans:a,hint:'부호 먼저 정하고, 숫자끼리 나눠.',why:`${Math.abs(a*b)} ÷ ${Math.abs(b)} = ${Math.abs(a)}, 부호는 ${a<0?'−':'+'} → ${fmt(a)}`}},
+  a(){if(Math.random()<.5){const p=R(1,5)*5,n=R(2,6);return{q:`게임에서 한 판 질 때마다 점수가 ${p}점씩 깎여.\n${n}연패하면 점수 변화는? (깎이면 음수로)`,ans:-p*n,hint:`(${M}${p}) × ${n}`,why:`(${M}${p}) × ${n} = ${fmt(-p*n)}점`}}
+   const d=R(2,4),h=R(2,6);return{q:`실외 수영장 물 온도가 1시간마다 ${d}도씩 내려가.\n${h}시간 뒤 온도 변화는? (내려가면 음수로)`,ans:-d*h,hint:`(${M}${d}) × ${h}`,why:`(${M}${d}) × ${h} = ${fmt(-d*h)}도`}},
+  e(){const a=R(2,6),b=R(2,5),c=R(2,4),ans=-a*c;return{q:`(${fmt(-a*b)}) ÷ (${fmt(-b)}) × (${fmt(-c)}) 의 값은?`,...mcN(ans,[a*c,-a*b*c,a]),hint:'음수가 세 개 → 결과 부호는 −. 숫자는 왼쪽부터.',why:`${a*b} ÷ ${b} × ${c} = ${a*c}, 음수 3개라 ${fmt(ans)}`}},
+  boss(){const a=R(2,5),b=R(2,6),c=R(2,6),ans=a*a+b*c;return{q:`(${M}${a})² − ${b} × (${M}${c}) 의 값은?`,ans,hint:'순서: 거듭제곱 → 곱셈 → 뺄셈. (−a)²은 양수야.',why:`(${M}${a})² = ${a*a}, ${b} × (${M}${c}) = ${fmt(-b*c)} → ${a*a} − (${fmt(-b*c)}) = ${ans}`}}
+ }},
+{title:'문자로 말하기',concept:'문자와 식, 식의 값',
+ story:['골드 계산기','상점에서 아이템 하나가 12골드, 입장료가 20골드야. 아이템을 몇 개 살지 아직 모르면 총 비용은 어떻게 쓸까?','개수를 x라 하면 12x + 20. 문자는 "아직 모르는 수"의 자리표시야.'],
+ discover:['문자 x는 아직 정해지지 않은 수의 자리.','12x는 12 × x. 곱하기 기호는 생략해.','x에 값을 넣으면 식의 값이 나와.<div class="formula">x = 3 → 12×3 + 20 = 56</div>'],
+ key:'식의 값 = 문자 자리에 수를 넣고 계산',
+ gen:{
+  b(){const a=R(2,9)*sg(),b=R(-9,9),v=nz(-5,5),ans=a*v+b;return{q:`x = ${fmt(v)} 일 때, ${poly([a,b])} 의 값은?`,ans,hint:`x 자리에 ${P(v)}를 괄호째 넣어.`,why:`${a} × ${P(v)} ${b<0?M:'+'} ${Math.abs(b)} = ${fmt(a*v)} ${b<0?M:'+'} ${Math.abs(b)} = ${fmt(ans)}`}},
+  a(){const g=R(3,15),e=R(5,30),n=R(2,8);return{q:`아이템 하나에 ${g}골드, 입장료는 ${e}골드.\n아이템 x개를 사고 입장하는 비용은 ${g}x + ${e}.\nx = ${n} 이면 몇 골드?`,ans:g*n+e,hint:`${g} × ${n} 먼저, 그다음 + ${e}.`,why:`${g} × ${n} + ${e} = ${g*n+e}골드`}},
+  e(){const v=R(-4,-1),k=R(1,5),ans=v*v-k*v;return{q:`x = ${fmt(v)} 일 때, ${poly([1,-k,0])} 의 값은?`,...mcN(ans,[-v*v-k*v,v*v+k*v,-v*v+k*v]),hint:`x²에 넣을 때는 (${fmt(v)})² = ${v*v}. 음수의 제곱은 양수.`,why:`${v*v} − ${k} × (${fmt(v)}) = ${v*v} + ${-k*v} = ${ans}`}},
+  boss(){const a=nz(-5,5),b=nz(-5,5),ans=2*a-3*b+a*b;return{q:`a = ${fmt(a)}, b = ${fmt(b)} 일 때,\n2a − 3b + ab 의 값은?`,ans,hint:'세 덩어리로 나눠: 2a, 3b, ab 각각 계산하고 합쳐.',why:`2a = ${fmt(2*a)}, 3b = ${fmt(3*b)}, ab = ${fmt(a*b)} → ${fmt(2*a)} − ${P(3*b)} + ${P(a*b)} = ${fmt(ans)}`}}
+ }},
+{title:'지워진 기록',concept:'일차방정식 ①  x + a = b',
+ story:['수영 기록의 비밀','친구의 50m 기록은 50초. 내 기록은 친구보다 6초 빨랐어. 그런데 기록표에서 내 기록이 지워졌네. 몇 초였을까?','모르는 기록을 x초라 하면 x + 6 = 50. 방정식은 관계를 이용해 모르는 값을 찾는 도구야.'],
+ discover:['방정식은 양팔 저울. 양쪽에 같은 걸 하면 균형이 유지돼.','양쪽에서 6을 빼.<div class="formula">x + 6 = 50 → x = 50 − 6 = 44</div>','빼기가 있으면 양쪽에 더해.<div class="formula">x − 4 = 9 → x = 13</div>'],
+ key:'양쪽에 같은 수를 더하거나 빼서 x만 남기기',
+ gen:{
+  b(){const x=R(-10,20),a=nz(-15,15);return{q:`${poly([1,a])} = ${fmt(x+a)} 에서 x의 값은?`,ans:x,hint:a>0?`양쪽에서 ${a}를 빼.`:`양쪽에 ${-a}를 더해.`,why:`x = ${fmt(x+a)} ${a>0?M:'+'} ${Math.abs(a)} = ${fmt(x)}`}},
+  a(){const f=R(48,70),d=R(2,9);return{q:`친구의 50m 기록은 ${f}초. 내 기록은 친구보다 ${d}초 빨라.\n내 기록을 x초라 할 때 x는?`,ans:f-d,hint:`빠르다 = 시간이 적다. x + ${d} = ${f}`,why:`x + ${d} = ${f} → x = ${f-d}초`}},
+  e(){const a=R(2,9),b=R(-9,9),ans=b+a;return{q:`방정식 x − ${a} = ${fmt(b)} 의 해는?`,...mcN(ans,[b-a,-ans,a-b],n=>'x = '+fmt(n)),hint:`양쪽에 ${a}를 더해.`,why:`x = ${fmt(b)} + ${a} = ${fmt(ans)}`}},
+  boss(){const p=R(3,15),q=R(2,12),r=R(5,30),ans=r-p+q;return{q:`어떤 수에 ${p}를 더하고, 다시 ${q}를 뺐더니 ${r}이 됐어.\n어떤 수는?`,ans,hint:`어떤 수를 x로: x + ${p} − ${q} = ${r}`,why:`x + ${p-q} = ${r} → x = ${ans}`}}
+ }},
+{title:'테트리스 점수판',concept:'일차방정식 ②  ax + b = c',
+ story:['몇 줄 지웠지?','테트리스에서 한 줄 지울 때마다 50점, 시작 보너스 100점. 끝나고 보니 총 600점이야. 몇 줄 지웠을까?','줄 수를 x라 하면 50x + 100 = 600.'],
+ discover:['먼저 더해진 수를 정리해.<div class="formula">50x + 100 = 600 → 50x = 500</div>','x에 곱해진 수로 양쪽을 나눠.<div class="formula">50x = 500 → x = 10</div>','순서는 항상 "더하기·빼기 정리 → 나누기".'],
+ key:'ax + b = c → ax = c − b → x = (c − b) ÷ a',
+ gen:{
+  b(){const a=R(2,9),x=R(-6,9),b=R(-15,15);return{q:`${poly([a,b])} = ${fmt(a*x+b)} 에서 x의 값은?`,ans:x,hint:`먼저 ${b>=0?'양쪽에서 '+b+'를 빼':'양쪽에 '+(-b)+'를 더해'}. 그다음 ${a}로 나눠.`,why:`${a}x = ${fmt(a*x)} → x = ${fmt(x)}`}},
+  a(){const a=pick([10,20,25,50]),n=R(3,15),b=pick([50,100,150,200]);return{q:`한 줄 지울 때마다 ${a}점, 시작 보너스 ${b}점.\n총 ${a*n+b}점이었다면 몇 줄 지웠을까?`,ans:n,hint:`${a}x + ${b} = ${a*n+b}`,why:`${a}x = ${a*n} → x = ${n}줄`}},
+  e(){const a=R(2,6),x=R(-5,6),b=R(1,12);return{q:`방정식 ${a}x − ${b} = ${fmt(a*x-b)} 의 해는?`,...mcN(x,[-x,x+b,x*a],n=>'x = '+fmt(n)),hint:`양쪽에 ${b}를 더하고 ${a}로 나눠.`,why:`${a}x = ${fmt(a*x)} → x = ${fmt(x)}`}},
+  boss(){const a=R(3,9),c=R(1,a-1),x=R(-6,8),b=R(-10,10),d=(a-c)*x+b;return{q:`${poly([a,b])} = ${poly([c,d])} 에서 x의 값은?`,ans:x,hint:'x가 있는 항은 왼쪽, 숫자는 오른쪽으로. 넘기면 부호가 바뀌어(이항).',why:`${a}x − ${c}x = ${fmt(d)} ${b<0?'+':M} ${Math.abs(b)} → ${a-c}x = ${fmt(d-b)} → x = ${fmt(x)}`}}
+ }},
+{title:'50m 레인',concept:'거리·속력·시간',
+ story:['레인 위의 공식','초속 2m로 헤엄치면 50m 레인을 몇 초에 끝낼까?','거리 = 속력 × 시간. 셋 중 둘을 알면 나머지 하나가 나와.'],
+ discover:['<div class="formula">거리 = 속력 × 시간</div>','<div class="formula">시간 = 거리 ÷ 속력</div>50 ÷ 2 = 25초','<div class="formula">속력 = 거리 ÷ 시간</div>단위(m와 초, km와 시간)를 꼭 맞춰.'],
+ key:'거리 = 속력 × 시간 (단위 맞추기)',
+ gen:{
+  b(){const s=R(1,4),t=R(5,40),k=R(0,2),d=s*t;
+   if(k===0)return{q:`초속 ${s}m로 ${t}초 동안 헤엄치면 몇 m?`,ans:d,hint:'거리 = 속력 × 시간',why:`${s} × ${t} = ${d}m`};
+   if(k===1)return{q:`${d}m를 초속 ${s}m로 가면 몇 초 걸려?`,ans:t,hint:'시간 = 거리 ÷ 속력',why:`${d} ÷ ${s} = ${t}초`};
+   return{q:`${d}m를 ${t}초에 갔다면 초속 몇 m?`,ans:s,hint:'속력 = 거리 ÷ 시간',why:`${d} ÷ ${t} = ${s}m/초`}},
+  a(){const v=pick([10,12,15,20]),d=R(1,6),m=d*60/v;return{q:`수영장까지 ${d}km. 자전거로 시속 ${v}km로 가면 몇 분 걸려?`,ans:m,hint:`시간 = ${d} ÷ ${v} (시간 단위). 1시간 = 60분으로 바꿔.`,why:`${d} ÷ ${v} 시간 = ${d} × 60 ÷ ${v} = ${m}분`}},
+  e(){const v=R(3,8)*10,h=R(2,4),ans=v*h;return{q:`시속 ${v}km로 ${h}시간 이동한 거리는?`,...mcN(ans,[v+h,ans+v,ans-v],n=>n+'km'),hint:'거리 = 속력 × 시간',why:`${v} × ${h} = ${ans}km`}},
+  boss(){const [v1,v2,l]=pick([[2,3,6],[3,6,6],[4,6,12],[3,4,12],[2,6,6]]),D=l*R(1,2),ans=D/v1+D/v2;return{q:`편도 ${D}km 산책로를 왕복해.\n갈 때 시속 ${v1}km, 올 때 시속 ${v2}km.\n총 몇 시간 걸려?`,ans,hint:'갈 때 시간과 올 때 시간을 따로 구해서 더해.',why:`${D}÷${v1} = ${D/v1}, ${D}÷${v2} = ${D/v2} → ${ans}시간`}}
+ }},
+{title:'기록 단축률',concept:'비율과 퍼센트',
+ story:['10% 빨라진다는 것','지금 50m 기록이 60초야. 코치가 "10%만 줄이자"고 했어. 목표 기록은 몇 초일까?','60의 10%는 6초. 목표는 54초.'],
+ discover:['%는 100을 기준으로 한 비율. 10% = 10/100 = 0.1','A의 p% = A × p ÷ 100<div class="formula">60의 10% = 60 × 10 ÷ 100 = 6</div>','증가율 = (늘어난 양 ÷ 처음 양) × 100'],
+ key:'A의 p% = A × p ÷ 100',
+ gen:{
+  b(){const p=pick([5,10,20,25,30,50]),n=R(1,20)*20,ans=n*p/100;return{q:`${n}의 ${p}%는?`,ans,hint:`${n} × ${p} ÷ 100`,why:`${n} × ${p} ÷ 100 = ${ans}`}},
+  a(){const t=pick([40,60,80,100,120]),p=pick([5,10,20]),ans=t*(100-p)/100;return{q:`지금 기록이 ${t}초야. ${p}% 단축하면 목표 기록은 몇 초?`,ans,hint:`먼저 ${t}의 ${p}%를 구하고, ${t}에서 빼.`,why:`${t} × ${p} ÷ 100 = ${t*p/100} → ${t} − ${t*p/100} = ${ans}초`}},
+  e(){const c=R(2,20)*1000,p=pick([10,20,25,30]),ans=c*(100-p)/100;return{q:`정가 ${c.toLocaleString()}원인 수경을 ${p}% 할인한 가격은?`,...mcN(ans,[c*p/100,c-p*10,ans+1000],n=>n.toLocaleString()+'원'),hint:'할인액을 먼저 구하고 정가에서 빼.',why:`할인액 ${(c*p/100).toLocaleString()}원 → ${ans.toLocaleString()}원`}},
+  boss(){const [a,p]=pick([[20,25],[40,25],[40,50],[50,20],[80,25],[20,50],[50,10]]),b=a*(100+p)/100;return{q:`하루 연습을 ${a}분에서 ${b}분으로 늘렸어.\n몇 % 늘어난 거야?`,ans:p,hint:'(늘어난 양 ÷ 처음 양) × 100',why:`늘어난 양 ${b-a}분 → ${b-a} ÷ ${a} × 100 = ${p}%`}}
+ }},
+{title:'같은 블록끼리',concept:'다항식의 덧셈·뺄셈 (동류항)',
+ story:['테트리스 정리법','테트리스에서 같은 모양끼리만 줄이 맞춰지듯, 식에서도 같은 종류끼리만 합쳐져. 3x + 2 + 5x 는 어떻게 정리할까?','x끼리 3 + 5 = 8, 숫자는 그대로 → 8x + 2.'],
+ discover:['문자와 차수가 같은 항이 "동류항". 3x와 5x는 동류항, 3x와 3x²는 아니야.','동류항은 계수(앞의 수)끼리만 더하고 빼.<div class="formula">3x − 5x + 4x = 2x</div>','괄호 앞이 −면 안의 부호가 전부 바뀌어.<div class="formula">−(2x − 3) = −2x + 3</div>'],
+ key:'동류항끼리 계수만 계산, −( ) 는 부호 전부 반대',
+ gen:{
+  b(){const cs=[R(1,9),R(1,9)*sg(),R(1,9)*sg()],ans=cs[0]+cs[1]+cs[2];
+   const s=cs.map((c,i)=>i===0?c+'x':(c<0?` − ${-c}x`:` + ${c}x`)).join('');
+   return{q:`${s} = □x 에서 □는?`,ans,hint:'x 앞의 수만 차례로 더하고 빼.',why:`${cs.map(fmt).join(', ')} 를 더하면 ${fmt(ans)}`}},
+  a(){const a=R(2,9),b=nz(-9,9),c=R(1,a-1),d=nz(-9,9),r=[a-c,b-d];return{q:`(${poly([a,b])}) − (${poly([c,d])}) 를 간단히 하면?`,...mcP(r,[[a-c,b+d],[a+c,b-d],[a-c,d-b]]),hint:'뒤 괄호의 부호를 전부 바꾼 다음 동류항끼리.',why:`${poly([a,b])} ${c===1?'− x':'− '+c+'x'} ${d<0?'+ '+(-d):'− '+d} = ${poly(r)}`}},
+  e(){const A=[R(1,4),nz(-6,6),nz(-6,6)],B=[R(1,3),nz(-6,6),nz(-6,6)],r=A.map((v,i)=>v+B[i]);return{q:`(${poly(A)}) + (${poly(B)}) 를 계산하면?`,...mcP(r,[[r[0],r[1],A[2]-B[2]],[r[0],A[1]-B[1],r[2]],[r[0]+r[1],0,r[2]]]),hint:'x²끼리, x끼리, 숫자끼리.',why:`x²: ${A[0]}+${B[0]}, x: ${fmt(A[1])}+${P(B[1])}, 숫자: ${fmt(A[2])}+${P(B[2])} → ${poly(r)}`}},
+  boss(){const a=R(2,6),b=nz(-9,9),c=R(1,5),d=nz(-9,9),ans=2*b-d;return{q:`A = ${poly([a,b])}, B = ${poly([c,d])} 일 때,\n2A − B 의 상수항은?`,ans,hint:'상수항(숫자)만 보면 돼: 2 × (A의 숫자) − (B의 숫자).',why:`2 × ${P(b)} − ${P(d)} = ${fmt(ans)}`}}
+ }},
+{title:'괄호 풀기',concept:'분배법칙과 다항식의 곱셈',
+ story:['팀 유니폼 주문','팀원 3명에게 (수모 x원 + 수경 5000원) 세트를 하나씩. 총액은 3(x + 5000)이야. 괄호를 풀면?','3x + 15000. 괄호 앞의 수를 안쪽 모든 항에 곱해 주는 게 분배법칙.'],
+ discover:['<div class="formula">a(x + b) = ax + ab</div>','괄호 두 개면 앞의 각 항을 뒤의 각 항에 곱해(4번).<div class="formula">(x + 2)(x + 3) = x² + 3x + 2x + 6 = x² + 5x + 6</div>','완전제곱식<div class="formula">(x + a)² = x² + 2ax + a²</div>'],
+ key:'(x + a)(x + b) = x² + (a + b)x + ab',
+ gen:{
+  b(){const a=nz(-9,9),b=nz(-9,9);return{q:`${a===-1?M:a===1?'':fmt(a)}(${poly([1,b])}) 를 전개했을 때 상수항은?`,ans:a*b,hint:`괄호 앞의 ${fmt(a)}를 ${fmt(b)}에 곱해.`,why:`${P(a)} × ${P(b)} = ${fmt(a*b)}`}},
+  a(){const a=nz(-7,7),b=nz(-7,7),r=[1,a+b,a*b];return{q:`(${poly([1,a])})(${poly([1,b])}) 를 전개하면?`,...mcP(r,[[1,a*b,a+b],[1,a+b,-a*b],[1,a-b,a*b]]),hint:'x의 계수 = 두 수의 합, 상수항 = 두 수의 곱.',why:`합 ${fmt(a)}+${P(b)} = ${fmt(a+b)}, 곱 ${fmt(a*b)} → ${poly(r)}`}},
+  e(){const a=nz(-6,6),r=[1,2*a,a*a];return{q:`(${poly([1,a])})² 을 전개하면?`,...mcP(r,[[1,0,a*a],[1,a,a*a],[1,2*a,2*a]]),hint:'(x + a)² = x² + 2ax + a². 가운데 항을 빠뜨리지 마.',why:`2 × ${P(a)} = ${fmt(2*a)}, ${P(a)}² = ${a*a} → ${poly(r)}`}},
+  boss(){const a=nz(-6,6),b=nz(-6,6),ans=2*b+a;return{q:`(${poly([2,a])})(${poly([1,b])}) 를 전개했을 때 x의 계수는?`,ans,hint:'x가 나오는 곱은 두 개: 2x × (뒤의 숫자), (앞의 숫자) × x.',why:`2 × ${P(b)} + ${P(a)} = ${fmt(ans)}`}}
+ }},
+{title:'레벨업 조건',concept:'일차부등식',
+ story:['몇 판이면 돼?','한 판 이기면 30점. 다음 티어로 가려면 200점을 넘겨야 해. 최소 몇 판 이겨야 할까?','30x > 200 → x > 6.66… → 최소 7판. 부등식은 "얼마 이상/초과"를 다루는 방정식의 친구야.'],
+ discover:['부등식도 방정식처럼 풀어: 더하고 빼고 나누기.','단, <b>음수로 곱하거나 나누면 부등호 방향이 뒤집혀.</b><div class="formula">−2x < 6 → x > −3</div>','"초과(>)"는 그 수 미포함, "이상(≥)"은 포함.'],
+ key:'음수로 나누면 부등호 방향 반대',
+ gen:{
+  b(){const a=nz(-9,9),b=R(-9,15),ans=b-a+1;return{q:`${poly([1,a])} > ${fmt(b)} 를 만족하는 가장 작은 정수 x는?`,ans,hint:`방정식처럼 정리하면 x > ${fmt(b-a)}. 그보다 큰 첫 정수는?`,why:`x > ${fmt(b-a)} → 가장 작은 정수는 ${fmt(ans)}`}},
+  a(){const a=pick([20,25,30,40,50]),b=R(3,12)*a+R(1,a-1),ans=Math.floor(b/a)+1;return{q:`한 판 이기면 ${a}점. ${b}점을 넘겨야 다음 티어야.\n최소 몇 판 이겨야 해?`,ans,hint:`${a}x > ${b} → x > ${(b/a).toFixed(2)}`,why:`x > ${(b/a).toFixed(2)} → 최소 ${ans}판`}},
+  e(){const k=R(2,5),s=nz(-5,5),m=R(-9,9),n=-k*s+m;return{q:`부등식 ${poly([-k,m])} ≤ ${fmt(n)} 의 해는?`,ans:`x ≥ ${fmt(s)}`,choices:shuffle([`x ≥ ${fmt(s)}`,`x ≤ ${fmt(s)}`,`x ≥ ${fmt(-s)}`,`x ≤ ${fmt(-s)}`]),hint:`${M}${k}로 나눌 때 부등호가 뒤집혀.`,why:`${M}${k}x ≤ ${fmt(n-m)} → 양쪽을 ${M}${k}로 나누고 방향 반대 → x ≥ ${fmt(s)}`}},
+  boss(){const a=R(3,6),c=R(1,a-1),s=R(3,8),b=R(1,9),d=(a-c)*s-b;return{q:`${poly([a,-b])} < ${poly([c,d])} 를 만족하는 자연수 x는 몇 개?`,ans:s-1,hint:'x < (어떤 수) 로 정리한 다음, 1부터 세어 봐.',why:`${a-c}x < ${(a-c)*s} → x < ${s} → 1~${s-1}, ${s-1}개`}}
+ }},
+{title:'요금표의 규칙',concept:'일차함수와 함숫값',
+ story:['자유수영 요금','자유수영은 입장료 3000원에 1시간마다 2000원. 이용 시간 x에 따라 요금 y가 정해져.','y = 2000x + 3000. x 하나에 y 하나가 정해지는 관계, 이게 함수야.'],
+ discover:['y = ax + b 에서 a는 "1 늘 때 변하는 양", b는 "x = 0일 때 값(y절편)".','함숫값은 x에 수를 넣으면 끝.<div class="formula">f(x) = 2x + 1 → f(3) = 7</div>','두 점을 알면 기울기 = y 변화량 ÷ x 변화량.'],
+ key:'y = ax + b : a = 기울기, b = y절편',
+ gen:{
+  b(){const a=nz(-5,5),b=R(-9,9),v=R(-4,6);return{q:`일차함수 y = ${poly([a,b])} 에서 x = ${fmt(v)} 일 때 y의 값은?`,ans:a*v+b,hint:`x 자리에 ${P(v)}를 넣어.`,why:`${a} × ${P(v)} ${b<0?M:'+'} ${Math.abs(b)} = ${fmt(a*v+b)}`}},
+  a(){const a=pick([1000,1500,2000]),b=pick([2000,3000,5000]),h=R(1,4),ans=a*h+b;return{q:`자유수영: 입장료 ${b.toLocaleString()}원 + 1시간마다 ${a.toLocaleString()}원.\n${h}시간 이용하면 몇 원? (숫자만)`,ans,hint:`y = ${a}x + ${b} 에 x = ${h}`,why:`${a} × ${h} + ${b} = ${ans.toLocaleString()}원`}},
+  e(){const a=nz(-5,5),b=nz(-9,9);return{q:`일차함수 y = ${poly([a,b])} 의 그래프의 y절편은?`,...mcN(b,[a,-b,a+b]),hint:'y절편 = x = 0일 때 y의 값.',why:`x = 0 → y = ${fmt(b)}`}},
+  boss(){const a=nz(-4,4),b=R(-9,9),p=R(1,3),r=p+R(1,3);return{q:`일차함수 f(x)에서 f(${p}) = ${fmt(a*p+b)}, f(${r}) = ${fmt(a*r+b)} 일 때,\nf(0)의 값은?`,ans:b,hint:'기울기 = (y 변화량) ÷ (x 변화량) 먼저. 그다음 x를 0까지 거꾸로.',why:`기울기 = ${fmt(a*(r-p))} ÷ ${r-p} = ${fmt(a)} → f(0) = ${fmt(a*p+b)} − ${P(a)} × ${p} = ${fmt(b)}`}}
+ }},
+{title:'기울기 읽기',concept:'일차함수의 기울기',
+ story:['연습량 그래프','1주차에 200m, 5주차에 600m를 헤엄쳤어. 매주 같은 만큼 늘렸다면 한 주에 몇 m씩일까?','(600 − 200) ÷ (5 − 1) = 100m. 이게 그래프의 "기울기"야.'],
+ discover:['<div class="formula">기울기 = (y의 변화량) ÷ (x의 변화량)</div>','기울기가 +면 오르막, −면 내리막.','기울기가 같은 두 직선은 평행.<div class="formula">y = 2x + 1 ∥ y = 2x − 5</div>'],
+ key:'기울기 = Δy ÷ Δx, 평행 = 기울기 같음',
+ gen:{
+  b(){const a=nz(-4,4),x1=R(-4,3),dx=R(1,4),y1=R(-6,6),x2=x1+dx,y2=y1+a*dx;return{q:`두 점 (${fmt(x1)}, ${fmt(y1)}), (${fmt(x2)}, ${fmt(y2)}) 을 지나는 직선의 기울기는?`,ans:a,hint:'(y 차이) ÷ (x 차이). 같은 순서로 빼.',why:`(${fmt(y2)} − ${P(y1)}) ÷ (${fmt(x2)} − ${P(x1)}) = ${fmt(a*dx)} ÷ ${dx} = ${fmt(a)}`}},
+  a(){const w1=R(1,3),w2=w1+R(2,5),d1=pick([200,300,400]),inc=pick([50,100,150]),d2=d1+inc*(w2-w1);return{q:`${w1}주차에 ${d1}m, ${w2}주차에 ${d2}m를 헤엄쳤어.\n매주 같은 만큼 늘렸다면 한 주에 몇 m씩?`,ans:inc,hint:'(거리 차이) ÷ (주 차이)',why:`(${d2} − ${d1}) ÷ (${w2} − ${w1}) = ${inc}m`}},
+  e(){const a=nz(-4,4),b=nz(-6,6),c=b+R(1,5);const L=(s,t)=>'y = '+poly([s,t]);return{q:`직선 y = ${poly([a,b])} 와 평행한 직선은?`,ans:L(a,c),choices:mc(L(a,c),[L(-a,b),L(a+1,c),L(b===a?a+2:b,a)],k=>L(a+k+1,c)),hint:'평행하려면 x 앞의 수(기울기)가 같아야 해.',why:`기울기가 ${fmt(a)}로 같은 것: ${L(a,c)}`}},
+  boss(){const a=nz(-4,4),p=nz(-4,4),q=R(-8,8),ans=q-a*p;return{q:`기울기가 ${fmt(a)}이고 점 (${fmt(p)}, ${fmt(q)})을 지나는 직선의 y절편은?`,ans,hint:`y = ${fmt(a)}x + b 에 점을 넣어 b를 구해.`,why:`${fmt(q)} = ${fmt(a)} × ${P(p)} + b → b = ${fmt(ans)}`}}
+ }},
+{title:'승점 퍼즐',concept:'연립일차방정식',
+ story:['리그 성적표','리그 10경기 무패! 이기면 3점, 비기면 1점이고 총 22점이야. 몇 번 이겼을까?','승 x, 무 y: x + y = 10, 3x + y = 22. 식 두 개로 모르는 수 두 개를 찾는 게 연립방정식.'],
+ discover:['식끼리 빼서 한 문자를 없애(소거).<div class="formula">(3x + y) − (x + y) = 22 − 10 → 2x = 12</div>','x = 6을 한 식에 넣어 y = 4.','더하기로 없앨 수도 있어.<div class="formula">x + y = 7, x − y = 1 → 2x = 8</div>'],
+ key:'두 식을 더하거나 빼서 문자 하나 없애기',
+ gen:{
+  b(){const x=R(-5,9),y=R(-5,9);return{q:`연립방정식\nx + y = ${fmt(x+y)}\nx − y = ${fmt(x-y)}\n에서 x의 값은?`,ans:x,hint:'두 식을 그대로 더하면 y가 사라져.',why:`2x = ${fmt(2*x)} → x = ${fmt(x)}`}},
+  a(){const n=R(8,15),w=R(2,n-1),p=3*w+(n-w);return{q:`리그 ${n}경기 무패(승 또는 무승부).\n승리 3점, 무승부 1점, 총 ${p}점이야.\n몇 번 이겼어?`,ans:w,hint:`승 x, 무 y: x + y = ${n}, 3x + y = ${p}. 빼 봐.`,why:`2x = ${p} − ${n} = ${p-n} → x = ${w}승`}},
+  e(){const x=nz(-4,5),y=nz(-4,5);const L=(a,b)=>`x = ${fmt(a)}, y = ${fmt(b)}`;return{q:`연립방정식\n2x + y = ${fmt(2*x+y)}\nx − y = ${fmt(x-y)}\n의 해는?`,ans:L(x,y),choices:mc(L(x,y),[L(y,x),L(-x,y),L(x,-y),L(x+1,y-2)],k=>L(x+k,y)),hint:'두 식을 더하면 y가 사라져: 3x = ?',why:`3x = ${fmt(3*x)} → x = ${fmt(x)}, y = ${fmt(x)} − ${P(x-y)} = ${fmt(y)}`}},
+  boss(){let a,b,d,e;do{a=R(1,5);b=R(1,5);d=R(1,5);e=R(1,5)}while(a*e===b*d);const x=nz(-4,5),y=nz(-4,5);const c1=v=>v===1?'':v;return{q:`연립방정식\n${c1(a)}x + ${c1(b)}y = ${fmt(a*x+b*y)}\n${c1(d)}x + ${e===1?'':e}y = ${fmt(d*x+e*y)}\n의 해를 x, y라 할 때 x + y 의 값은?`,ans:x+y,hint:'한 식에 수를 곱해 x(또는 y)의 계수를 맞춘 다음 빼.',why:`풀면 x = ${fmt(x)}, y = ${fmt(y)} → x + y = ${fmt(x+y)}`}}
+ }},
+{title:'대진표 만들기',concept:'경우의 수',
+ story:['리그전 경기 수','친구 6명이 모바일 게임 리그를 열었어. 모두 서로 한 번씩 붙으면 경기는 총 몇 번일까?','각자 5번씩 → 6 × 5 = 30, 그런데 A vs B와 B vs A는 같은 경기라 ÷ 2 = 15경기.'],
+ discover:['"그리고"(동시에 / 연달아) → 곱하기. 종목 3개 × 시간대 4개 = 12가지.','"또는"(둘 중 하나) → 더하기.','순서가 있으면 n × (n − 1), 순서가 없으면 그걸 ÷ 2.'],
+ key:'그리고 → ×, 또는 → +, 순서 없으면 ÷ 2',
+ gen:{
+  b(){const k=R(3,11),ans=6-Math.abs(7-k);return{q:`주사위 2개를 던질 때, 두 눈의 합이 ${k}인 경우는 몇 가지?`,ans,hint:'(1, ?), (2, ?) … 처럼 첫 주사위부터 차례로 적어 봐.',why:`합이 ${k}: ${Array.from({length:6},(_,i)=>i+1).filter(a=>k-a>=1&&k-a<=6).map(a=>`(${a},${k-a})`).join(' ')} → ${ans}가지`}},
+  a(){const m=R(2,4),n=R(2,5);return{q:`수영 종목 ${m}가지 중 하나, 연습 시간대 ${n}가지 중 하나를 고르는 방법은 몇 가지?`,ans:m*n,hint:'종목 "그리고" 시간대 → 곱하기.',why:`${m} × ${n} = ${m*n}가지`}},
+  e(){const n=R(4,9),ans=n*(n-1);return{q:`${n}명 중에서 대표 1명, 부대표 1명을 뽑는 경우의 수는?`,...mcN(ans,[ans/2,n*n,2*n],v=>v+'가지'),hint:'대표 먼저 n명 중 1명, 부대표는 남은 사람 중 1명. 역할이 다르니 순서가 있어.',why:`${n} × ${n-1} = ${ans}가지`}},
+  boss(){const n=R(4,10),ans=n*(n-1)/2;return{q:`${n}개 팀이 서로 한 번씩 경기하는 리그전.\n총 경기 수는?`,ans,hint:'각 팀이 (n − 1)경기. 한 경기에 두 팀이 같이 세어지니 ÷ 2.',why:`${n} × ${n-1} ÷ 2 = ${ans}경기`}}
+ }}
+];
+
+// ---------- state ----------
+const KEY='10quest.v1';
+const fresh=()=>({name:'',done:{},xp:0,streak:0,last:'',short:false,log:[]});
+let S=fresh();
+try{S={...S,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const level=()=>({lv:Math.floor(S.xp/150)+1,pct:(S.xp%150)/150*100});
+const nextIdx=()=>{const i=Q.findIndex((_,k)=>!S.done[k]);return i<0?Q.length-1:i};
+const unlocked=i=>i===0||!!S.done[i-1];
+const TIERS={b:'기본',a:'응용',e:'시험형',boss:'보스'};
+const app=document.getElementById('app');
+let run=null,VIEW='';
+// ---------- results to parent (db): each child writes results/<own id>, only the owner (parent) reads them all ----------
+let DB=null,UID=null,OWNER=false,SYNC='off',KIDS=[],unsubKids=null;
+const getSeen=()=>{try{return +localStorage.getItem('10quest.seen')||0}catch(e){return 0}};
+const setSeen=v=>{try{localStorage.setItem('10quest.seen',String(v))}catch(e){}};
+const mmss=sec=>Math.floor(sec/60)+'분 '+String(sec%60).padStart(2,'0')+'초';
+// results by email via FormSubmit (works on a normal website; blocked inside claude.ai, where db is used instead)
+const NOTIFY=''; // 결과를 받을 이메일 주소
+function flush(){if(!NOTIFY||!S.pending||flush.busy)return;flush.busy=true;const l=S.pending;
+  fetch('https://formsubmit.co/ajax/'+NOTIFY,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
+    body:JSON.stringify({_subject:`[10QUEST] ${S.name} · Day ${l.day} ${l.title} ${l.first}/${l.total}`,_template:'box',
+      이름:S.name,퀘스트:`Day ${l.day} ${l.title}`,결과:`한 번에 맞힌 랩 ${l.first}/${l.total} · ${mmss(l.sec)}`,
+      '스스로 느낀 이해도':l.rating?l.rating+'/5':'-',회고:l.note||'-',누적:`완료 ${Object.keys(S.done).length}/14 · XP ${S.xp} · 연속 ${S.streak}일`})})
+   .then(r=>r.json()).then(j=>{if(String(j.success)==='true'){S.pending=null;save()}}).catch(()=>{}).finally(()=>flush.busy=false)}
+function push(){if(!DB||!UID)return;
+  DB.doc('results/'+UID).set({name:S.name,xp:S.xp,streak:S.streak,last:S.last,doneCount:Object.keys(S.done).length,
+    days:Object.entries(S.done).map(([i,d])=>({i:+i,...d})),log:S.log.slice(-30),updated:Date.now()})
+   .then(()=>SYNC='ok').catch(()=>SYNC='fail')}
+function watchKids(){if(unsubKids||!DB)return;
+  unsubKids=DB.collection('results').onSnapshot(snap=>{KIDS=snap.docs.filter(d=>d.id!==UID).map(d=>d.data());
+    if(run)return;if(VIEW==='parent')parent();else if(VIEW==='home'&&!document.getElementById('panel')?.innerHTML)home()},()=>{})}
+
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,1800)}
+
+// ---------- screens ----------
+function home(){
+  if(!S.name)return nameScreen();
+  run=null;VIEW='home';flush();const newN=KIDS.filter(k=>k.updated>getSeen()).length;const {lv,pct}=level(),ni=nextIdx(),doneN=Object.keys(S.done).length,nq=Q[ni];
+  app.innerHTML=`
+  <div class="row between"><div><div class="eyebrow">Math · 14-Day Challenge</div><h1>10QUEST</h1></div>
+   <div class="row">${OWNER?`<button class="link" id="parent">보호자 보기${newN?` · 새 결과 ${newN}`:''}</button>`:''}<button class="link" id="settings">설정</button></div></div>
+  <div id="panel"></div>
+  <div class="rope"></div>
+  <p class="muted">${esc(S.name)}, 오늘도 한 레인만. 작은 성공이 진짜 자신감이 돼.</p>
+  <div class="stats">
+   <div class="stat"><b>${lv}</b><span>레벨</span></div>
+   <div class="stat"><b>${S.xp}</b><span>XP</span></div>
+   <div class="stat"><b>${S.streak}</b><span>연속 일수</span></div>
+   <div class="stat"><b>${doneN}<small class="muted">/14</small></b><span>완료</span></div>
+  </div>
+  <div class="xpbar" aria-label="다음 레벨까지"><i style="width:${pct}%"></i></div>
+  <div class="hero">
+   <div class="eyebrow" style="color:inherit;opacity:.8">${S.done[ni]?'다시 도전해서 기록 깨기':'다음 퀘스트'} · Day ${ni+1}</div>
+   <h2>${nq.title}</h2><p style="opacity:.9">${nq.concept} · ${S.short?'5':'10'}문제 · 약 ${S.short?'10':'20'}분</p>
+   ${S.done[ni]?`<p class="num" style="opacity:.9">지난 최고 ${S.done[ni].best}/${S.done[ni].total}</p>`:''}
+   <button class="btn wide" data-go="${ni}">시작하기</button>
+  </div>
+  <h3>퀘스트 맵</h3>
+  <div class="map">${Q.map((q,i)=>{const d=S.done[i],u=unlocked(i);
+    return `<button class="tile ${d?'done':''} ${i===ni&&!d?'next':''} ${u?'':'locked'}" ${u?`data-go="${i}"`:'disabled aria-disabled="true"'}>
+     <span class="d">DAY ${String(i+1).padStart(2,'0')}</span><span class="t">${q.title}</span>
+     <span class="s">${d?`최고 ${d.best}/${d.total} · ${d.plays}회`:u?q.concept:'앞 퀘스트를 끝내면 열려'}</span></button>`}).join('')}</div>
+`;
+  if(OWNER)document.getElementById('parent').onclick=parent;
+  app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>story(+b.dataset.go));
+  document.getElementById('settings').onclick=settings;
+}
+
+function nameScreen(){
+  VIEW='name';
+  app.innerHTML=`<div><div class="eyebrow">Math · 14-Day Challenge</div><h1>10QUEST</h1></div><div class="rope"></div>
+  <div class="card"><h2>반가워! 뭐라고 부를까?</h2><p class="muted">기록과 결과 리포트에 이 이름이 쓰여. 나중에 설정에서 바꿀 수 있어.</p>
+   <div class="row"><input type="text" id="nm0" maxlength="12" placeholder="이름 또는 닉네임" aria-label="이름"><button class="btn" id="nm0s">시작</button></div></div>`;
+  const go=()=>{const v=document.getElementById('nm0').value.trim();if(!v)return toast('이름을 적어 줘');S.name=v;save();push();home()};
+  document.getElementById('nm0s').onclick=go;document.getElementById('nm0').onkeydown=e=>{if(e.key==='Enter')go()};
+}
+function parent(){
+  VIEW='parent';const seenAt=getSeen();setSeen(Date.now());
+  const kids=[...KIDS].sort((a,b)=>b.updated-a.updated);
+  app.innerHTML=`<div class="row between"><button class="link" id="back">← 맵</button><span class="eyebrow">보호자 보기</span></div><div class="rope"></div>
+  ${kids.length?kids.map(k=>`<div class="card">
+    <div class="row between"><h2>${esc(k.name||'이름 없음')}</h2>${k.updated>seenAt?'<span class="tier boss">새 결과</span>':''}</div>
+    <p class="muted">마지막 활동 ${new Date(k.updated).toLocaleString('ko-KR')}</p>
+    <div class="stats"><div class="stat"><b>${k.doneCount||0}<small class="muted">/14</small></b><span>완료</span></div><div class="stat"><b>${Math.floor((k.xp||0)/150)+1}</b><span>레벨</span></div><div class="stat"><b>${k.xp||0}</b><span>XP</span></div><div class="stat"><b>${k.streak||0}</b><span>연속 일수</span></div></div>
+    ${(k.log||[]).slice().reverse().slice(0,7).map(l=>`<div class="fb why"><b>Day ${l.day} ${esc(l.title)} · <span class="num">${l.first}/${l.total}</span></b>
+      <span class="muted">${esc(l.date)} · ${mmss(l.sec)}${l.rating?` · 스스로 느낀 이해도 ${l.rating}/5`:''}${l.missed?` · 다시 볼 것 ${l.missed}`:''}</span>${l.note?`<span>"${esc(l.note)}"</span>`:''}</div>`).join('')||'<p class="muted">아직 끝낸 퀘스트가 없어요.</p>'}
+   </div>`).join(''):`<div class="card"><h3>아직 들어온 결과가 없어요</h3><p class="muted">아이가 claude.ai에 로그인한 상태로 이 페이지를 열고 이름을 정하면 여기에 나타나고, 퀘스트를 끝낼 때마다 자동으로 갱신돼요.</p></div>`}`;
+  document.getElementById('back').onclick=home;
+}
+function settings(){
+  const p=document.getElementById('panel');
+  if(p.innerHTML){p.innerHTML='';return}
+  p.innerHTML=`<div class="card"><h3>설정</h3>
+   <div class="row"><label for="nm" class="muted">이름</label><input type="text" id="nm" value="${esc(S.name)}" maxlength="12"><button class="btn ghost" id="nmSave">저장</button></div>
+   <p class="muted" style="font-size:.9rem">${SYNC==='ok'?'엄마에게 결과 자동 전송: 켜짐':SYNC==='fail'?'자동 전송이 안 됐어. 기록은 이 기기에 저장돼 있어.':'엄마에게 자동 전송: 꺼짐 (claude.ai에 로그인해서 열면 켜져)'}</p>
+   <label class="toggle"><input type="checkbox" id="short" ${S.short?'checked':''}> 가볍게 5문제 모드 (기본 2 · 응용 1 · 시험형 1 · 보스 1)</label>
+   <div class="eyebrow">엄마에게 보내는 리포트</div>
+   <p class="muted">점수와 회고를 텍스트로 복사해. 카톡에 붙여 넣으면 돼.</p>
+   <button class="btn ghost" id="copy">리포트 복사</button>
+   <p class="muted" style="font-size:.8rem">기록은 이 기기의 브라우저에만 저장돼. 인터넷 기록을 지우면 사라질 수 있어.</p></div>`;
+  document.getElementById('nmSave').onclick=()=>{S.name=document.getElementById('nm').value.trim()||S.name;save();push();home();toast('저장했어')};
+  document.getElementById('short').onchange=e=>{S.short=e.target.checked;save();home()};
+  document.getElementById('copy').onclick=()=>{
+    const t=report();
+    navigator.clipboard.writeText(t).then(()=>toast('리포트를 복사했어')).catch(()=>{p.insertAdjacentHTML('beforeend',`<textarea id="rep" readonly>${esc(t)}</textarea>`);const r=document.getElementById('rep');r.focus();r.select();toast('선택된 글을 복사해 줘')});
+  };
+}
+function report(){
+  const {lv}=level();
+  const lines=[`[10QUEST 학습 리포트] ${S.name} · ${today()}`,`완료 ${Object.keys(S.done).length}/14 · 레벨 ${lv} · XP ${S.xp} · 연속 ${S.streak}일`,''];
+  Q.forEach((q,i)=>{const d=S.done[i];if(!d)return;
+    lines.push(`Day ${i+1} ${q.title}: 최고 ${d.best}/${d.total} (${d.plays}회) · 스스로 느낀 이해도 ${d.rating||'-'}/5`);
+    if(d.note)lines.push(`  "${d.note}"`)});
+  return lines.join('\n');
+}
+
+function story(i){
+  VIEW='x';const q=Q[i];
+  app.innerHTML=`
+  <div class="row between"><button class="link" id="back">← 맵</button><span class="eyebrow">Day ${i+1} · 1/3 Story</span></div>
+  <div class="rope"></div>
+  <div class="card"><div class="eyebrow">${q.concept}</div><h2>${q.story[0]}</h2>
+   <p class="q">${q.story[1]}</p>
+   <details><summary class="link" style="cursor:pointer">생각해 보고 눌러 봐</summary><p style="margin-top:8px">${q.story[2]}</p></details></div>
+  <button class="btn wide" id="go">원리 알아보기</button>`;
+  document.getElementById('back').onclick=home;
+  document.getElementById('go').onclick=()=>discover(i);
+}
+
+function discover(i){
+  VIEW='x';const q=Q[i];
+  app.innerHTML=`
+  <div class="row between"><button class="link" id="back">← 스토리</button><span class="eyebrow">Day ${i+1} · 2/3 Discover</span></div>
+  <div class="rope"></div>
+  <div class="card"><h2>${q.concept}</h2>
+   <div class="steps">${q.discover.map((s,k)=>`<div class="step"><span class="n">${k+1}</span><div>${s}</div></div>`).join('')}</div>
+   <div class="fb hint"><b>핵심 한 줄</b><span>${q.key}</span></div></div>
+  <button class="btn wide" id="go">${S.short?5:10}랩 도전 시작</button>`;
+  document.getElementById('back').onclick=()=>story(i);
+  document.getElementById('go').onclick=()=>start(i);
+}
+
+function start(i){
+  const tiers=S.short?['b','b','a','e','boss']:['b','b','b','b','a','a','a','e','e','boss'];
+  run={i,tiers,k:0,laps:[],t0:Date.now(),xp:0};
+  newLap(false);
+}
+function newLap(similar){run.cur={p:Q[run.i].gen[run.tiers[run.k]](),tries:0,hinted:false,similar,fb:null,entry:'',sel:null};challenge()}
+
+function challenge(){
+  const q=Q[run.i],c=run.cur,p=c.p,tier=run.tiers[run.k],n=run.tiers.length,locked=c.fb==='ok'||c.fb==='missed'||c.fb==='why';
+  const lane=run.tiers.map((_,k)=>`<span class="lap ${k<run.laps.length?run.laps[k]:k===run.k?'cur':''}"></span>`).join('');
+  let fb='';
+  if(c.fb==='ok')fb=`<div class="fb ok" role="status"><b>${c.similar?'다시 해서 잡았어!':c.tries||c.hinted?'힌트로 해냈어!':'한 번에 정답!'} +${c.gain} XP</b><span class="muted">${esc(p.why)}</span></div>`;
+  if(c.fb==='hint')fb=`<div class="fb hint" role="status"><b>${c.tries?'아직 아니야. 힌트 보고 한 번 더.':'힌트'}</b><span>${esc(p.hint)}</span></div>`;
+  if(c.fb==='why')fb=`<div class="fb why" role="status"><b>풀이를 보자. 정답은 ${esc(typeof p.ans==='number'?fmt(p.ans):p.ans)}</b><span>${esc(p.why)}</span><span class="muted">틀린 건 기록이 아니라 연습이야. 숫자만 바꾼 비슷한 문제로 다시.</span></div>`;
+  if(c.fb==='missed')fb=`<div class="fb why" role="status"><b>정답은 ${esc(typeof p.ans==='number'?fmt(p.ans):p.ans)}</b><span>${esc(p.why)}</span><span class="muted">이 유형은 리포트에 "다시 볼 것"으로 남겨 둘게. 다음 랩으로.</span></div>`;
+  const input=p.choices?`<div class="choices">${p.choices.map((ch,k)=>`<button class="choice ${c.sel===k?'sel':''}" data-ch="${k}" ${locked?'disabled':''}><span class="k">${'①②③④'[k]}</span><span>${esc(ch)}</span></button>`).join('')}</div>`
+   :`<div class="ansbox ${c.entry?'':'empty'}" aria-live="polite">${c.entry?esc(c.entry.replace('-',M)):'답을 입력해'}</div>
+     <div class="pad">${['1','2','3','4','5','6','7','8','9','-','0','⌫'].map(k=>`<button data-k="${k}" ${locked?'disabled':''} aria-label="${k==='-'?'음수 부호':k==='⌫'?'지우기':k}">${k==='-'?M:k}</button>`).join('')}</div>`;
+  const action=c.fb==='ok'||c.fb==='missed'?`<button class="btn wide" id="next">${run.k+1===n?'결과 보기':'다음 랩 →'}</button>`
+   :c.fb==='why'?`<button class="btn gold wide" id="similar">비슷한 문제로 다시 도전</button>`
+   :`<div class="row"><button class="btn ghost" id="hint" ${c.hinted?'disabled':''}>힌트</button><button class="btn" id="ok" style="flex:1" ${(p.choices?c.sel===null:!c.entry)?'disabled':''}>확인</button></div>`;
+  app.innerHTML=`
+  <div class="row between"><button class="link" id="quit">오늘은 여기까지</button><span class="eyebrow">Day ${run.i+1} · 3/3 Challenge</span></div>
+  <div class="lane" style="--n:${n}" aria-label="${n}랩 중 ${run.k+1}번째">${lane}</div>
+  <div class="row between"><span class="tier ${tier==='boss'?'boss':''}">${run.k+1===n?'마지막 랩 · ':''}${TIERS[tier]}${c.similar?' · 재도전':''}</span><span class="num muted">LAP ${run.k+1}/${n}</span></div>
+  <div class="card"><p class="q">${esc(p.q)}</p>${input}</div>
+  ${fb}${action}`;
+  app.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>key(b.dataset.k));
+  app.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{c.sel=+b.dataset.ch;challenge()});
+  const on=(id,f)=>{const el=document.getElementById(id);if(el)el.onclick=f};
+  on('quit',home);on('ok',submit);on('next',next);on('similar',()=>newLap(true));
+  on('hint',()=>{c.hinted=true;c.fb='hint';challenge()});
+}
+function key(k){const c=run.cur;if(!c||c.fb==='ok'||c.fb==='missed'||c.fb==='why')return;
+  if(k==='⌫')c.entry=c.entry.slice(0,-1);
+  else if(k==='-')c.entry=c.entry.startsWith('-')?c.entry.slice(1):'-'+c.entry;
+  else if(c.entry.replace('-','').length<7)c.entry+=k;
+  challenge()}
+function submit(){
+  const c=run.cur,p=c.p;
+  const right=p.choices?p.choices[c.sel]===p.ans:Number(c.entry)===p.ans;
+  if(right){
+    const res=c.similar?'similar':(c.tries||c.hinted)?'hint':'first';
+    c.gain={first:10,hint:6,similar:3}[res]*(run.tiers[run.k]==='boss'?2:1);
+    run.xp+=c.gain;run.laps.push(res);c.fb='ok';
+  }else{
+    c.tries++;c.entry='';c.sel=null;
+    if(c.tries===1){c.hinted=true;c.fb='hint'}
+    else if(!c.similar)c.fb='why';
+    else{run.xp+=1;run.laps.push('missed');c.fb='missed'}
+  }
+  challenge();
+}
+function next(){run.k++;if(run.k<run.tiers.length)newLap(false);else finish()}
+
+function finish(){
+  const sec=Math.round((Date.now()-run.t0)/1000),first=run.laps.filter(x=>x==='first').length,n=run.laps.length;
+  const prev=S.done[run.i],isBest=!prev||first>prev.best||(prev.total!==n);
+  const d=new Date(),t=today();
+  if(S.last!==t){const y=new Date(d-864e5),ys=y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0');S.streak=S.last===ys?S.streak+1:1;S.last=t}
+  S.xp+=run.xp;VIEW='x';
+  S.log.push({day:run.i+1,title:Q[run.i].title,first,total:n,sec,date:t,missed:run.laps.filter(x=>x==='missed').length,rating:0,note:''});S.pending={...S.log[S.log.length-1]};
+  S.done[run.i]={best:prev&&prev.total===n?Math.max(prev.best,first):first,total:n,plays:(prev?.plays||0)+1,bestTime:prev?.bestTime?Math.min(prev.bestTime,sec):sec,rating:prev?.rating||0,note:prev?.note||'',date:t};
+  save();push();
+  const mm=Math.floor(sec/60)+'분 '+String(sec%60).padStart(2,'0')+'초';
+  const count=r=>run.laps.filter(x=>x===r).length;
+  const missedTiers=[...new Set(run.laps.map((r,k)=>r==='missed'?TIERS[run.tiers[k]]:null).filter(Boolean))];
+  app.innerHTML=`
+  <div class="row between"><span class="eyebrow">Day ${run.i+1} · Level Up</span><span class="num muted">+${run.xp} XP</span></div>
+  <div class="rope"></div>
+  <div class="card"><h2>${Q[run.i].title} 완주</h2>
+   <div class="row" style="align-items:flex-end;gap:16px"><span class="big">${first}<span class="muted" style="font-size:1.4rem">/${n}</span></span><span class="muted">한 번에 맞힌 랩<br>${mm}</span></div>
+   ${isBest&&prev?`<div class="fb ok"><b>어제의 나를 이겼어. 개인 최고 기록 갱신!</b></div>`:''}
+   ${!prev?`<div class="fb ok"><b>첫 완주! 다음 퀘스트가 열렸어.</b></div>`:''}
+   <div class="lane" style="--n:${n}">${run.laps.map(r=>`<span class="lap ${r}"></span>`).join('')}</div>
+   <div class="chips"><span class="tier">한 번에 ${count('first')}</span><span class="tier">힌트로 ${count('hint')}</span><span class="tier">재도전으로 ${count('similar')}</span><span class="tier">다시 볼 것 ${count('missed')}</span></div>
+   ${missedTiers.length?`<p class="muted">다음엔 <b>${missedTiers.join(', ')}</b> 유형부터 천천히. 같은 퀘스트를 다시 하면 숫자가 새로 바뀌어.</p>`:''}
+   <div class="fb hint"><b>오늘의 핵심</b><span>${Q[run.i].key}</span></div></div>
+  <div class="card"><h3>30초 회고</h3>
+   <label for="note">처음엔 몰랐는데 지금은 이해한 것 한 가지는?</label>
+   <textarea id="note" placeholder="예: 음수를 빼면 더하기가 된다는 것">${esc(S.done[run.i].note)}</textarea>
+   <span>지금 이해한 정도를 스스로 매겨 봐</span>
+   <div class="rate">${[1,2,3,4,5].map(v=>`<button data-r="${v}" class="${S.done[run.i].rating===v?'on':''}">${v}</button>`).join('')}</div>
+   <p class="muted" id="cmp" style="font-size:.9rem"></p></div>
+  <button class="btn wide" id="home">저장하고 맵으로</button>`;
+  const rec=S.done[run.i];
+  const cmp=()=>{if(!rec.rating)return;const real=Math.round(first/n*5);document.getElementById('cmp').textContent=`스스로 느낀 이해도 ${rec.rating}/5 · 실제 한 번에 맞힌 비율로는 ${real}/5. ${rec.rating>real?'느낌보다 아직 덜 익었어. 한 번 더 하면 확실해질 거야.':rec.rating<real?'생각보다 훨씬 잘하고 있어.':'자기 실력을 정확히 보고 있어.'}`};
+  cmp();
+  app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{rec.rating=+b.dataset.r;app.querySelectorAll('[data-r]').forEach(x=>x.classList.toggle('on',x===b));cmp()});
+  document.getElementById('home').onclick=()=>{rec.note=document.getElementById('note').value.trim();const L=S.log[S.log.length-1];for(const x of [L,S.pending])if(x){x.note=rec.note;x.rating=rec.rating}save();push();home()};
+  run=null;
+}
+
+document.addEventListener('keydown',e=>{
+  if(!run||!run.cur||e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT')return;
+  const c=run.cur;
+  if(e.key==='Enter'){e.preventDefault();if(c.fb==='ok'||c.fb==='missed')next();else if(c.fb==='why')newLap(true);else if(c.p.choices?c.sel!==null:c.entry)submit();return}
+  if(c.p.choices){if('1234'.includes(e.key)&&e.key){c.sel=+e.key-1;challenge()}return}
+  if(/^[0-9]$/.test(e.key))key(e.key);else if(e.key==='-')key('-');else if(e.key==='Backspace')key('⌫');
+});
+home();
+(async()=>{
+  const u=await window.claude?.use?.('user'),db=await window.claude?.use?.('db');
+  if(u){OWNER=await u.isOwner();UID=await u.id()}
+  if(db&&UID){DB=db;SYNC='ok';
+    try{const snap=await db.doc('results/'+UID).get(),r=snap.exists&&snap.data();
+      if(r&&!Object.keys(S.done).length&&r.days?.length){ // new device: restore from the saved results
+        S={...S,name:S.name||r.name||'',xp:r.xp||0,streak:r.streak||0,last:r.last||'',done:Object.fromEntries(r.days.map(d=>[d.i,{...d}])),log:(r.log||[]).map(l=>({...l}))};save()}
+      else if(S.name)push();
+    }catch(e){}}
+  if(OWNER&&DB)watchKids();
+  if(!run&&(VIEW==='home'||VIEW==='name'))home();
+})().catch(()=>{});
+</script>
+
+</body></html>
